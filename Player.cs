@@ -11,6 +11,7 @@ public partial class Player : CharacterBody3D
 	[Export] public string InspectAnimName { get; set; }
 	[Export] public string ReloadAnimName { get; set; }
 	[Export] public string FireAnimName { get; set; }
+	[Export] public string WalkAnimName { get; set; }
 
 	[ExportGroup("Nodes")]
 	[Export] public Camera3D CameraNode;
@@ -103,6 +104,7 @@ public partial class Player : CharacterBody3D
 		{
 			velocity.X = Mathf.Lerp(velocity.X, direction.X * Speed, Acceleration);
 			velocity.Z = Mathf.Lerp(velocity.Z, direction.Z * Speed, Acceleration);
+			armStateMachinePlayback.Travel(WalkAnimName);
 		}
 		else
 		{
@@ -111,6 +113,7 @@ public partial class Player : CharacterBody3D
             Vector2 normalizedVel = vel.Normalized();
             velocity.X = normalizedVel.X * temp;
             velocity.Z = normalizedVel.Y * temp;
+			armStateMachinePlayback.Travel(IdleAnimName);
 		}
 
 		Velocity = velocity;
