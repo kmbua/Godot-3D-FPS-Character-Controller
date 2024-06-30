@@ -3,41 +3,73 @@ using System;
 
 public partial class Player : CharacterBody3D
 {
-	public const float Speed = 5.0f;
-	public const float JumpVelocity = 4.5f;
+	[ExportGroup("Animation Settings")]
+	[Export] public AnimationPlayer animationPlayer;
+	[Export] public AnimationTree animationTree;
+	[Export] public string ArmStateMachinePlaybackPath { get; set; }
+	[Export] public string IdleAnimName { get; set; }
+	[Export] public string InspectAnimName { get; set; }
+	[Export] public string ReloadAnimName { get; set; }
+	[Export] public string FireAnimName { get; set; }
+
+	[ExportGroup("Nodes")]
 	[Export] public Camera3D CameraNode;
 	[Export] public Node3D WeaponRig;
 
-
+	[ExportGroup("Movement Settings")]
+	[Export] public float Speed = 5.0f;
+	[Export] public float JumpVelocity = 4.5f;
+	
+	[ExportGroup("Mouse Look Settings")]
 	[Export] public float RotationSpeed { get; set; }
 	[Export] public float CameraActualRotationSpeed { get; set; }
 	[Export] public float WeaponActualRotationSpeed { get; set; }
 	[Export] public float VerticalRotationLimit { get; set; } = 00;
 
-	[ExportGroup("Nodes")]
-	
-	[Export] public AnimationPlayer animationPlayer;
-	[Export] public AnimationTree animationTree;
-
-	public bool IsCrouching = false;
-
 	// Get the gravity from the project settings to be synced with RigidBody nodes.
 	public float gravity = ProjectSettings.GetSetting("physics/3d/default_gravity").AsSingle();
 
+	private AnimationNodeStateMachinePlayback armStateMachinePlayback;
 	private Vector3 targetRotation;
 	
     public override void _Ready()
     {
         Input.MouseMode = Input.MouseModeEnum.Captured;
+		armStateMachinePlayback = (AnimationNodeStateMachinePlayback)animationTree.Get(ArmStateMachinePlaybackPath);
     }
 
     public override void _Input(InputEvent @event)
     {
         if (@event.IsActionPressed("EXIT"))
 		{
-			GetTree().Quit();
+			ToggleMouseMode();
+		}
+		if (@event.IsActionPressed("FIRE"))
+		{
+			armStateMachinePlayback.Travel(FireAnimName);
+
+		}
+		if (@event.IsActionPressed("RELOAD"))
+		{
+			armStateMachinePlayback.Travel(ReloadAnimName);
+		}
+		if (@event.IsActionPressed("INSPECT"))
+		{
+			armStateMachinePlayback.Travel(InspectAnimName);
 		}
     }
+
+	private void ToggleMouseMode()
+	{
+		if (Input.MouseMode == Input.MouseModeEnum.Visible)
+		{
+			Input.MouseMode = Input.MouseModeEnum.Captured;
+		}
+		else
+		{
+			Input.MouseMode = Input.MouseModeEnum.Visible;
+		}
+	}
 
     public override void _UnhandledInput(InputEvent @event)
     {
