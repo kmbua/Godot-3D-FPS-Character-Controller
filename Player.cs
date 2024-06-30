@@ -19,6 +19,7 @@ public partial class Player : CharacterBody3D
 	[ExportGroup("Movement Settings")]
 	[Export] public float Speed = 5.0f;
 	[Export] public float JumpVelocity = 4.5f;
+	[Export] public float Acceleration = 0.5f;
 	
 	[ExportGroup("Mouse Look Settings")]
 	[Export] public float RotationSpeed { get; set; }
@@ -100,13 +101,16 @@ public partial class Player : CharacterBody3D
 		Vector3 direction = (CameraNode.Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
 		if (direction != Vector3.Zero)
 		{
-			velocity.X = direction.X * Speed;
-			velocity.Z = direction.Z * Speed;
+			velocity.X = Mathf.Lerp(velocity.X, direction.X * Speed, Acceleration);
+			velocity.Z = Mathf.Lerp(velocity.Z, direction.Z * Speed, Acceleration);
 		}
 		else
 		{
-			velocity.X = Mathf.MoveToward(Velocity.X, 0, Speed);
-			velocity.Z = Mathf.MoveToward(Velocity.Z, 0, Speed);
+			Vector2 vel = new Vector2(velocity.X, velocity.Z);
+            float temp = Mathf.MoveToward(vel.Length(), 0, Acceleration);
+            Vector2 normalizedVel = vel.Normalized();
+            velocity.X = normalizedVel.X * temp;
+            velocity.Z = normalizedVel.Y * temp;
 		}
 
 		Velocity = velocity;
